@@ -9,8 +9,6 @@
   },
   "scripts": {
     "build": "npx babel -d ./build ./src -s ",
-    "migrate": "npx sequelize db:migrate",
-    "heroku-postbuild": "npm run migrate",
     "dev": "nodemon --exec babel-node src/app.js",
     "prestart": "npm run build",
     "start": "node ./build/app.js",
