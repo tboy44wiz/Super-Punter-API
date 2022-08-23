@@ -68,8 +68,8 @@ class JoiValidator {
     //  Podcasts Validation Schema.
     static podcastsSchema = Joi.object({
         title: Joi.string().required().min(3),
-        contestantA: Joi.string().required().min(3),
-        contestantB: Joi.string().required().min(3),
+        contestantA: Joi.string().allow(''),
+        contestantB: Joi.string().allow(''),
         sportsName: Joi.string().required().min(3),
         leagueName: Joi.string().required().min(3),
         leagueAbbrev: Joi.string(),
@@ -82,8 +82,8 @@ class JoiValidator {
     //  Podcasts Update Validation Schema.
     static podcastsUpdateSchema = Joi.object({
         title: Joi.string().required().min(3),
-        contestantA: Joi.string().min(3),
-        contestantB: Joi.string().min(3),
+        contestantA: Joi.string().allow(''),
+        contestantB: Joi.string().allow(''),
         sportsName: Joi.string().min(3),
         leagueName: Joi.string().min(3),
         leagueAbbrev: Joi.string(),

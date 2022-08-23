@@ -124,7 +124,7 @@ class UsersController {
                 const response = new Response(
                     false,
                     404,
-                    "User does not exist."
+                    "Incorrect email. Please check your email and try again."
                 );
                 return res.status(response.code).json(response);
             }
@@ -343,7 +343,7 @@ class UsersController {
             const { id : payLoadId } = req.requestPayload;
             const { id } = req.params;
             const requestBody = req.body;
-            // console.log(payLoadId);
+            console.log(requestBody);
 
             //  Validate the Request Body.
             const { error, value } = JoiValidator.usersUpdateSchema.validate(requestBody);
@@ -357,12 +357,12 @@ class UsersController {
             }
 
             if (value.email) {
-                const foundItem = await Users.findOne({
+                const foundUser = await Users.findOne({
                     where: { id }
                 });
 
                 //  First check if the user Email is changed.
-                if (foundItem.email === value.email) {
+                if (foundUser.email === value.email) {
                     const updatedUser = await Users.update({ ...value }, { where: { id } });
                     if (updatedUser[0] === 0) {
                         const response = new Response(
@@ -477,6 +477,7 @@ class UsersController {
     static deleteUser = async (req, res) => {
         try {
             const { id } = req.params;
+            console.log("IDDDDDD::: ", id);
 
             /**
              * Before deleting a user, first chack if the user already had a picture uploaded 
@@ -674,6 +675,7 @@ class UsersController {
                 width: 500,
                 height: 500,
                 crop: 'fill',
+                gravity: 'faces',
             });
 
             //  Update the Users Profile Picture..

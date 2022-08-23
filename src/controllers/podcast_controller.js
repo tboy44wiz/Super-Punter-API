@@ -15,12 +15,12 @@ class PodcastsController {
         try {
             const requestBody = req.body;
             const requestFile = req.files;
-            // const imageFile = requestFile.featuredImageFile[0];
-            // const videoFile = requestFile.featuredVideoFile[0];
+            const imageFile = requestFile.featuredImageFile[0];
+            const videoFile = requestFile.featuredVideoFile[0];
 
             // console.log("REQUEST BODY::: ", requestBody);
-            // console.log("IMAGE FILE::: ", imageFile);
-            // console.log("VIDEO FILE::: ", videoFile);
+            console.log("IMAGE FILE::: ", imageFile);
+            console.log("VIDEO FILE::: ", videoFile);
 
             //  Validate the Request Body.
             const { error, value } = JoiValidator.podcastsSchema.validate(requestBody);
@@ -47,69 +47,77 @@ class PodcastsController {
 
             
             // At this point, Upload image to cloudinary
-            // const { url: featuredImageFile, public_id: featuredImageId } = await cloudinary.uploader.upload(imageFile.path, {
-            //     public_id: `${ id }_featured_image`,
-            //     folder: 'assets/images/podcast_images',
-            //     quality_analysis: true,
-            //     width: 1024,
-            //     height: 500,
-            //     crop: 'fill',
-            // });
-            // // console.log("DDDD::: ", featuredImageFile); 
+            const { secure_url: featuredImageFile, public_id: featuredImageId } = await cloudinary.uploader.upload(
+                imageFile.path, 
+                {
+                    public_id: `${ id }_featured_image`,
+                    folder: 'assets/images/podcast_images',
+                    quality_analysis: true,
+                    width: 1024,
+                    height: 500,
+                    crop: 'fill',
+                    timeout: 20000,
+                }
+            );
+            console.log(`DDDD::: , ${featuredImageFile}`); 
 
-            // // Next, Upload video to cloudinary
-            // const { url: featuredVideoFile, public_id: featuredVideoId } = await cloudinary.uploader.upload(videoFile.path, {
-            //     public_id: `${ id }_featured_video`,
-            //     folder: 'assets/videos/podcast_videos',
-            //     quality_analysis: true,
-            //     resource_type: 'video',
-            //     chunk_size: 6000000,
-            //     eager: [
-            //         {
-            //             width: 1024,
-            //             height: 576,
-            //             crop: "fill",
-            //             audio_codec: "none",
-            //         },
-            //     ],
-            // });
+            // Next, Upload video to cloudinary
+            const { secure_url: featuredVideoFile, public_id: featuredVideoId } = await cloudinary.uploader.upload_large(
+                videoFile.path, 
+                {
+                    public_id: `${ id }_featured_video`,
+                    folder: 'assets/videos/podcast_videos',
+                    quality_analysis: true,
+                    resource_type: 'video',
+                    chunk_size: 6000000,
+                    eager: [
+                        {
+                            width: 1024,
+                            height: 576,
+                            crop: "fill",
+                            audio_codec: "none",
+                        },
+                    ],
+                    timeout: 100000,
+                }
+            );
+            console.log(`DDDD::: , ${featuredVideoFile}`); 
 
-            // //  Finally update the Podcast Video and Featured Image.
-            // const updatedPodcast = await Podcasts.update(
-            //     { featuredImageFile, featuredImageId, featuredVideoFile, featuredVideoId },
-            //     { where: { id } }
-            // );
-            // if (updatedPodcast[0] === 0) {
-            //     const response = new Response(
-            //         false,
-            //         400,
-            //         "Failed to update podcast video and featured image ."
-            //     );
-            //     return res.status(response.code).json(response);
-            // }
+            //  Finally update the Podcast Video and Featured Image.
+            const updatedPodcast = await Podcasts.update(
+                { featuredImageFile, featuredImageId, featuredVideoFile, featuredVideoId },
+                { where: { id } }
+            );
+            if (updatedPodcast[0] === 0) {
+                const response = new Response(
+                    false,
+                    400,
+                    "Failed to update podcast video and featured image ."
+                );
+                return res.status(response.code).json(response);
+            }
 
             //  Get the Podcast back.
-            // const returnedPodcast = await Podcasts.findOne({
-            //     where: { id },
-            //     attributes: { 
-            //         include: [
-            //             [Sequelize.fn("COUNT", Sequelize.col("likes.id")), "likesCount"],
-            //         ] 
-            //     },
-            //     include: [{
-            //         model: Likes,
-            //         as: "likes",
-            //         attributes: []
-            //     }],
-            //     group: ["Podcasts.id"]
-            // });
+            const returnedPodcast = await Podcasts.findOne({
+                where: { id },
+                attributes: { 
+                    include: [
+                        [Sequelize.fn("COUNT", Sequelize.col("likes.id")), "likesCount"],
+                    ] 
+                },
+                include: [{
+                    model: Likes,
+                    as: "likes",
+                    attributes: []
+                }],
+                group: ["Podcasts.id"]
+            });
 
             const response = new Response(
                 true,
                 201,
                 "Podcast created successfully.",
-                // { podcast: returnedPodcast }
-                podcast
+                { podcast: returnedPodcast }
             );
             return res.status(response.code).json(response);
 
@@ -134,7 +142,7 @@ class PodcastsController {
             // console.log("IMAGE FILE::: ", imageFile);
             
             /**
-             * To update user picture, first chack if the user already had a picture uploaded 
+             * To update user picture, first check if the user already had a picture uploaded 
              * on Cloudinary and first remove it.
              * 
              * Please NOTE::: If the "public_id" below is static, automatically, the image will
@@ -587,16 +595,20 @@ class PodcastsController {
     static deleteSinglePodcast = async (req, res) => {
         try {
             const { id } = req.params;
+            // console.log("IDDDD::: ", id);
 
             /**
              * Before deleting a podcast, first delete its associated video and pictures uploaded 
              * on Cloudinary.
              * */
              const { featuredVideoId, featuredImageId } = await Podcasts.findOne({ where: { id } });
+             console.log(featuredVideoId, featuredImageId);
              if (featuredVideoId, featuredImageId) {
                 // Delete image from Cloudinary.
-                await cloudinary.uploader.destroy(featuredVideoId, featuredImageId);
+                await cloudinary.uploader.destroy(featuredImageId);
+                await cloudinary.uploader.destroy(featuredVideoId);
              }
+            //  console.log(featuredVideoId, featuredImageId);
 
             const isDeleted = await Podcasts.destroy({
                 where: { id }
@@ -641,13 +653,15 @@ class PodcastsController {
                 return res.status(response.code).json(response);
             }
 
+            // Loop through all the "podcasts" and get their corresponding "likes.userId".
+            for (const podcast of podcasts) {
+                const likes = await Likes.findAll({
+                    where: { podcastId: podcast.id },
+                    attributes: ["userId"]
+                });
 
-            //  Get the Podcast's "likes.userId".
-            const likes = await Likes.findAll({
-                where: { podcastId: podcast.id },
-                attributes: ["userId"]
-            });
-            podcast.dataValues.likes = likes;
+                podcast.dataValues.likes = likes;
+            }
 
             const response = new Response(
                 true,

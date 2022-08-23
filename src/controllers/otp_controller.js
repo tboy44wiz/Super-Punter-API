@@ -1,5 +1,6 @@
 'use strict';
 
+import jwt from "jsonwebtoken";
 import * as OTPAuth from 'otpauth';
 import models from "../database/models";
 import Response from "../utils/response";
@@ -16,7 +17,7 @@ class OTPController {
 
         try {
             const requestBody = req.body;
-            console.log(requestBody);
+            // console.log(requestBody);
 
             //  Validate the Request Body.
             const { error, value } = await JoiValidator.otpSchema.validate(requestBody);
@@ -42,7 +43,7 @@ class OTPController {
 
             // Generate a token.
             const generatedOTP = totp.generate();
-            console.log("GENERATED OTP::: ", generatedOTP);
+            // console.log("GENERATED OTP::: ", generatedOTP);
 
             //  Save OTP to the DB
             await OTP.create({
@@ -82,6 +83,7 @@ class OTPController {
         try {
             const { id } = req.params;
             const requestBody = req.body;
+            console.log(requestBody);
 
             //  Validate the Request Body.
             const { error, value } = await JoiValidator.verifyOTPSchema.validate(requestBody);
@@ -96,7 +98,7 @@ class OTPController {
             const { email, otp } = value;
 
             // Create a new TOTP object.
-            let totp = new OTPAuth.TOTP({
+            const totp = new OTPAuth.TOTP({
                 issuer: 'superpunter.com',
                 label: 'SuperPunter',
                 algorithm: 'SHA1',
@@ -106,7 +108,7 @@ class OTPController {
             })
 
             // Validate an OTP.
-            let validatedOTP = totp.validate({
+            const validatedOTP = totp.validate({
                 token: otp,
                 window: 1
             });
@@ -118,11 +120,11 @@ class OTPController {
                 );
                 return res.status(response.code).json(response);
             }
-            console.log("VALIDATED::: ", validatedOTP);
+            // console.log("VALIDATED::: ", validatedOTP);
 
 
             //  Update the User "isVerified" property.
-            let updatedUser = await Users.update({ "isVerified": true }, { where: { id , email} });
+            const updatedUser = await Users.update({ "isVerified": true }, { where: { id , email} });
             if (updatedUser[0] === 0) {
                 const response = new Response(
                     false,
@@ -146,12 +148,25 @@ class OTPController {
                     exclude: ["password"]
                 }
             });
+            const { name, phone, role } = user;
+
+
+            //  Now remove the "password" before returning the User.
+            const userDataValues = user.dataValues;
+            delete userDataValues.pictureId;
+
+
+            //  Create a Token that will be passed to the response.
+            const token = jwt.sign(
+                { id, name, email, phone, role },
+                `${process.env.JWT_SECRET_KEY}`,
+            );
 
             const response = new Response(
                 true,
                 200,
                 "Successfully verified your account.",
-                user
+                { ...userDataValues, token }
             );
             return res.status(response.code).json(response);
             

@@ -5,15 +5,16 @@ class SendOTPMail {
 
     static sendMail = async (userName, userEmail, otp) => {
         /**
-         *  Username:	test@hilcot.com
+         *  Username:	support@superpunters.com
             Password:	Use the email account’s password.
-            Incoming Server:	mail.hilcot.com
+            Incoming Server:	server71.web-hosting.com
             IMAP Port: 993 POP3 Port: 995
-            Outgoing Server:	mail.hilcot.com
+            Outgoing Server:	server71.web-hosting.com
             SMTP Port: 465
             IMAP, POP3, and SMTP require authentication.
         * 
         */
+    //    console.log(`EMAIL::: , ${process.env.EMAIL_HOST} \n ${process.env.EMAIL_PORT} \n ${process.env.EMAIL_USERNAME}`);
 
         //  Creating a Transport
         const emailTransporter = nodemailer.createTransport({
@@ -24,9 +25,9 @@ class SendOTPMail {
                 user: process.env.EMAIL_USERNAME,
                 pass: process.env.EMAIL_PASSWORD,
             },
-            tls: {
-                rejectUnauthorized: false
-            },
+            // tls: {
+            //     rejectUnauthorized: false
+            // },
         });
 
         const emailData = {
