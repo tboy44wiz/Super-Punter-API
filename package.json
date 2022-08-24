@@ -14,8 +14,7 @@
     "heroku-postbuild": "npm run migrate",
     "dev": "nodemon --exec babel-node src/app.js",
     "prestart": "npm run build",
-    "start": "node ./build/app.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node ./build/app.js"
   },
   "repository": {
     "type": "git",
