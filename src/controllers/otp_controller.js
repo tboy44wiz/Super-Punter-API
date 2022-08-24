@@ -83,7 +83,7 @@ class OTPController {
         try {
             const { id } = req.params;
             const requestBody = req.body;
-            console.log(requestBody);
+            // console.log(requestBody);
 
             //  Validate the Request Body.
             const { error, value } = await JoiValidator.verifyOTPSchema.validate(requestBody);
