@@ -10,8 +10,8 @@ module.exports = {
     database: process.env.DEV_DB_NAME,
     host: process.env.DEV_DB_HOST,
     port: process.env.DEV_DB_PORT,
-    dialect: "postgres",
-    // dialect: "mysql"
+    // dialect: "postgres",
+    dialect: "mysql",
     logging: false,
   },
   test: {
@@ -20,8 +20,8 @@ module.exports = {
     database: process.env.TEST_DB_NAME,
     host: process.env.TEST_DB_HOST,
     port: process.env.TEST_DB_PORT,
-    dialect: "postgres",
-    // dialect: "mysql"
+    // dialect: "postgres",
+    dialect: "mysql",
     logging: false,
   },
   production: {
@@ -30,8 +30,8 @@ module.exports = {
     database: process.env.PRODUCTION_DB_NAME,
     host: process.env.PRODUCTION_DB_HOST,
     port: process.env.PRODUCTION_DB_PORT,
-    dialect: "postgres",
-    // dialect: "mysql"
+    // dialect: "postgres",
+    dialect: "mysql",
     logging: false,
     dialectOptions : {
       ssl: {

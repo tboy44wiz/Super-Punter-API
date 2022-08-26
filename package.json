@@ -8,7 +8,10 @@
     "npm": "8.x"
   },
   "scripts": {
-    "build": "npx babel -d ./build ./src -s ",
+    "build": "npx babel -d ./build ./src -s",
+    "migrate": "npx sequelize db:migrate",
+    "undo-migrate": "npx sequelize db:migrate:undo:all",
+    "heroku-postbuild": "npm run migrate",
     "dev": "nodemon --exec babel-node src/app.js",
     "prestart": "npm run build",
     "start": "node ./build/app.js"
@@ -41,8 +44,7 @@
     "nodemailer": "^6.7.5",
     "nodemailer-sendgrid-transport": "^0.2.0",
     "otpauth": "^7.1.2",
-    "pg": "^8.7.3",
-    "pg-hstore": "^2.3.4",
+    "mysql2": "2.3.3",
     "sequelize": "^6.19.0",
     "sequelize-cli": "^6.4.1",
     "uuid": "^8.3.2"

@@ -79,9 +79,9 @@ class TokenVerification {
 
             //  If Token exist, then make sure that the respective user exists in the DB.
             const user = await Users.findOne({
-                where: { id }
+                where: { id, role: "Admin" }
             });
-            if (user.role !== "Admin") {
+            if (!user) {
                 const response = new Response(
                     false,
                     401,
